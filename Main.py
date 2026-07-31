@@ -110,11 +110,11 @@ exit
 # ------------------------------------------------------------
 def write_iso_to_usb(iso_path, drive_letter, progress_callback=None):
     try:
-        # ШАГ 1: Форматирование
+        # Step 1: Formating
         progress_callback(10, LANG["ru"]["step1"])
         format_usb(drive_letter)
         
-        # ШАГ 2: Монтирование ISO
+        # Step 2: ISO
         progress_callback(25, LANG["ru"]["step2"])
         mount_cmd = [
             'powershell', '-ExecutionPolicy', 'Bypass',
@@ -123,7 +123,7 @@ def write_iso_to_usb(iso_path, drive_letter, progress_callback=None):
         subprocess.run(mount_cmd, capture_output=True, text=True,
                        creationflags=subprocess.CREATE_NO_WINDOW)
         
-        # Получаем букву ISO
+        # Getting the letter ISO
         get_drive_cmd = [
             'powershell', '-ExecutionPolicy', 'Bypass',
             '-Command', f'(Get-DiskImage -ImagePath "{iso_path}" | Get-Volume).DriveLetter'
@@ -135,7 +135,7 @@ def write_iso_to_usb(iso_path, drive_letter, progress_callback=None):
         if not iso_drive_letter:
             raise Exception("Не удалось определить букву смонтированного ISO.")
         
-        # ШАГ 3: Копирование файлов через robocopy
+        # ШАГ 3: Copying the files with robocopy
         progress_callback(40, LANG["ru"]["step3"])
         robocopy_cmd = [
             'robocopy', f'{iso_drive_letter}:\\', f'{drive_letter}\\',
@@ -144,7 +144,6 @@ def write_iso_to_usb(iso_path, drive_letter, progress_callback=None):
         process = subprocess.Popen(robocopy_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                    text=True, creationflags=subprocess.CREATE_NO_WINDOW)
         
-        # Ждём завершения и считываем прогресс
         for line in iter(process.stdout.readline, ''):
             if '%' in line:
                 try:
@@ -155,7 +154,7 @@ def write_iso_to_usb(iso_path, drive_letter, progress_callback=None):
         
         process.wait()
         
-        # ШАГ 4: Извлечение ISO (размонтирование)
+        # Step 3: Extracting the ISO
         progress_callback(85, LANG["ru"]["step4"])
         dismount_cmd = [
             'powershell', '-ExecutionPolicy', 'Bypass',
@@ -164,7 +163,7 @@ def write_iso_to_usb(iso_path, drive_letter, progress_callback=None):
         subprocess.run(dismount_cmd, capture_output=True, text=True,
                        creationflags=subprocess.CREATE_NO_WINDOW)
         
-        # ШАГ 5: Проверка файловой системы (наличие boot-папки)
+        # Step 4: Checking the File System (Boot folder
         progress_callback(95, LANG["ru"]["step5"])
         boot_folder = f"{drive_letter}\\boot"
         if not os.path.exists(boot_folder):
@@ -172,7 +171,7 @@ def write_iso_to_usb(iso_path, drive_letter, progress_callback=None):
             if not os.path.exists(boot_folder):
                 raise Exception("На флешке не появились загрузочные файлы.")
         
-        # ШАГ 6: Готово
+        # ШАГ 6: Done!
         progress_callback(100, LANG["ru"]["step6"])
         
         return True
@@ -195,7 +194,7 @@ class USBCreatorApp:
         for widget in self.root.winfo_children():
             widget.destroy()
 
-        # Язык
+        # Language
         lang_frame = tk.Frame(self.root)
         lang_frame.pack(pady=5, anchor="w", padx=20)
         tk.Label(lang_frame, text=LANG[self.current_lang]["lang"]).pack(side="left", padx=5)
@@ -219,7 +218,7 @@ class USBCreatorApp:
         self.usb_combo.pack(anchor="w", padx=20)
         tk.Button(self.root, text=LANG[self.current_lang]["refresh"], command=self.refresh_usb).pack(anchor="w", padx=20, pady=5)
 
-        # Кнопка СТАРТ
+        # Start button
         self.btn_start = tk.Button(
             self.root,
             text=LANG[self.current_lang]["start"],
@@ -228,11 +227,11 @@ class USBCreatorApp:
         )
         self.btn_start.pack(pady=30)
 
-        # Прогресс
+        # Progress
         self.progress = ttk.Progressbar(self.root, orient="horizontal", length=400, mode="determinate")
         self.progress.pack(pady=10)
 
-        # Статус
+        # Status
         self.lbl_status = tk.Label(self.root, text=LANG[self.current_lang]["ready"], fg="gray")
         self.lbl_status.pack()
 

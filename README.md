@@ -24,7 +24,7 @@ This is an **educational project** made in one day.
 It works, but for daily use or critical tasks, please use the original **[Rufus](https://rufus.ie/)**.
 
 ## Built with
-- Python + Tkinter (GUI)
+- Python + Tkinter (GUI) / C++ + MinGW64
 - Windows built-in tools: `diskpart`, `robocopy`, PowerShell
 
 ---
